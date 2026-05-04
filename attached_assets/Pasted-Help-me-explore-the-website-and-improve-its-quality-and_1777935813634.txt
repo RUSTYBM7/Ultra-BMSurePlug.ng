@@ -1,0 +1,46 @@
+Help me explore the website and improve its quality and graphics gestures by implementing a visual interface scrap new design features and implementing branding 
+
+import os, shutil
+
+base_dir = "/mnt/agents/output/bmsureplug-ng"
+
+# Clean and recreate
+if os.path.exists(base_dir):
+    shutil.rmtree(base_dir)
+
+for d in ["app", "app/services", "app/plans", "app/dashboard", "app/reseller", 
+          "app/marketplace", "app/giveaway", "components", "components/ui",
+          "lib", "public", "hooks", "types"]:
+    os.makedirs(f"{base_dir}/{d}", exist_ok=True)
+
+print("Fresh structure created")
+------//--/
+Make sure you understand that when you want to write my brand name! It’s always BMsureplug.ng
+It’s only on my logo I appear as “bmsocial hub logo” don’t write my logo ! It must be a embedded vector Svc
+First project now
+Fully clone my website https://owlet-catalog-logic–b147big7.replit.app
+Fully change designing to the branding you draft above
+And secondly fully go back to owlet website and accurately check pricing and minimum and maximum numbers exactly as it’s on owlet clean all those abnormal pricing and quantity (exactly as owlet) change all pricing as it’s on owlet but with a little bit different on every price ! Anything owlet provides you only +45% to all pricing! It’s very abnormal to have prices in hundreds of thousands and millions those are improper functions ( please deeply check again
+And please correct some malfunctioning social media Svc that’s either showing web svc which is wrong or it’s another social media logo which is not correct too now work. Also I want you to make sure website is fully Updated to be fully independent and not in any way related or dependable to replit and fully integrate 101% support for vercel deployments! Make sure it builds on vercel fully without any problems or errors on build ! Also run this bash to fully integrate ful website directly to vercel immediately after I approve the refine result ! Make the website ultimately world class                     
+bash -c 'set -e;
+ZIP=(ls *.zip | head -n1);
+[ -z "ZIP" ] && echo "❌ Upload a ZIP file first" && exit 1;
+echo "📦 Using ZIP";
+TMP=(mktemp -d);
+unzip -q "ZIP" -d "TMP";
+cd "$TMP";
+enter inner folder if single root dir
+DIRS=(find . -maxdepth 1 -type d | wc -l);
+if [ "DIRS" -eq 2 ]; then cd */; fi;
+echo "📁 Project: (pwd)";
+deploy directly without installing anything locally
+npx --yes vercel deploy --prod --yes;
+echo "🧹 Cleaning...";
+cd ~;
+rm -rf "TMP";
+echo "✅ Done (no files left behind)"'
+
+
+
+
+

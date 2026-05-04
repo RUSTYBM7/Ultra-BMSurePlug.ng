@@ -1,22 +1,22 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: BMsureplug Voice Studio API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: voice
+    description: Voice Studio operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +24,145 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /voice/voices:
+    get:
+      operationId: listVoices
+      tags: [voice]
+      summary: List available voices
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [all, free, premium, cloned]
+          required: false
+      responses:
+        "200":
+          description: List of voices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  voices:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Voice"
+                required: [voices]
+
+  /voice/tts:
+    post:
+      operationId: textToSpeech
+      tags: [voice]
+      summary: Convert text to speech
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TtsRequest"
+      responses:
+        "200":
+          description: TTS job queued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TtsResponse"
+
+  /voice/clone:
+    post:
+      operationId: cloneVoice
+      tags: [voice]
+      summary: Clone a voice from audio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CloneRequest"
+      responses:
+        "200":
+          description: Clone job started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloneResponse"
+
+  /voice/history:
+    get:
+      operationId: getHistory
+      tags: [voice]
+      summary: Get generation history
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          required: false
+      responses:
+        "200":
+          description: Generation history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  history:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/HistoryItem"
+                required: [history]
+
+  /voice/pricing:
+    get:
+      operationId: getPricing
+      tags: [voice]
+      summary: Get pricing tiers
+      responses:
+        "200":
+          description: Pricing plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  plans:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PricingPlan"
+                  creditPacks:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/CreditPack"
+                required: [plans, creditPacks]
+
+  /voice/credits:
+    get:
+      operationId: getCredits
+      tags: [voice]
+      summary: Get user credit balance
+      responses:
+        "200":
+          description: Credit balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditBalance"
+
+  /voice/stats:
+    get:
+      operationId: getVoiceStats
+      tags: [voice]
+      summary: Get voice studio stats
+      responses:
+        "200":
+          description: Usage stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceStats"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +170,184 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Voice:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+          enum: [free, premium, cloned]
+        gender:
+          type: string
+          enum: [male, female, neutral]
+        accent:
+          type: string
+        language:
+          type: string
+        previewUrl:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        isCloned:
+          type: boolean
+      required: [id, name, category, gender, accent, language, description, tags, isCloned]
+
+    TtsRequest:
+      type: object
+      properties:
+        text:
+          type: string
+        voiceId:
+          type: string
+        stability:
+          type: number
+        similarity:
+          type: number
+        style:
+          type: number
+      required: [text, voiceId]
+
+    TtsResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+        creditsUsed:
+          type: number
+        durationSeconds:
+          type: number
+        audioUrl:
+          type: string
+        text:
+          type: string
+        voiceId:
+          type: string
+        createdAt:
+          type: string
+      required: [jobId, status, creditsUsed, durationSeconds, text, voiceId, createdAt]
+
+    CloneRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        audioBase64:
+          type: string
+        fileName:
+          type: string
+      required: [name, audioBase64, fileName]
+
+    CloneResponse:
+      type: object
+      properties:
+        voiceId:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+        creditsUsed:
+          type: number
+        message:
+          type: string
+      required: [voiceId, name, status, creditsUsed, message]
+
+    HistoryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        voiceId:
+          type: string
+        voiceName:
+          type: string
+        durationSeconds:
+          type: number
+        creditsUsed:
+          type: number
+        audioUrl:
+          type: string
+        createdAt:
+          type: string
+        status:
+          type: string
+      required: [id, text, voiceId, voiceName, durationSeconds, creditsUsed, createdAt, status]
+
+    PricingPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        priceNaira:
+          type: number
+        credits:
+          type: number
+        features:
+          type: array
+          items:
+            type: string
+        isFree:
+          type: boolean
+        isPopular:
+          type: boolean
+      required: [id, name, priceNaira, credits, features, isFree, isPopular]
+
+    CreditPack:
+      type: object
+      properties:
+        id:
+          type: string
+        credits:
+          type: number
+        priceNaira:
+          type: number
+        label:
+          type: string
+        durationLabel:
+          type: string
+      required: [id, credits, priceNaira, label, durationLabel]
+
+    CreditBalance:
+      type: object
+      properties:
+        credits:
+          type: number
+        plan:
+          type: string
+        renewsAt:
+          type: string
+        totalUsed:
+          type: number
+      required: [credits, plan, totalUsed]
+
+    VoiceStats:
+      type: object
+      properties:
+        totalVoices:
+          type: number
+        totalGenerations:
+          type: number
+        totalMinutes:
+          type: number
+        clonedVoices:
+          type: number
+        activeUsers:
+          type: number
+      required: [totalVoices, totalGenerations, totalMinutes, clonedVoices, activeUsers]
