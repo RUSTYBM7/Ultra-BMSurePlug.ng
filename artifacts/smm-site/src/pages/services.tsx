@@ -1,30 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, ArrowRight, RefreshCcw, Zap, Star } from "lucide-react";
-import { Instagram, Youtube } from "lucide-react";
-import { SiTiktok, SiFacebook, SiTelegram, SiX, SiSpotify, SiDiscord, SiTwitch, SiSnapchat, SiPinterest } from "react-icons/si";
-import { Globe } from "lucide-react";
+import { Search, Filter, RefreshCcw, Zap, ChevronDown, ShoppingCart, Info } from "lucide-react";
+import { Instagram, Youtube, Globe } from "lucide-react";
+import { SiTiktok, SiFacebook, SiTelegram, SiX, SiSpotify, SiDiscord, SiTwitch, SiSnapchat, SiPinterest, SiWhatsapp, SiSoundcloud } from "react-icons/si";
+import { Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const PLATFORMS = [
-  { id: "all", label: "All Platforms", Icon: null },
-  { id: "instagram", label: "Instagram", Icon: Instagram },
-  { id: "tiktok", label: "TikTok", Icon: SiTiktok },
-  { id: "youtube", label: "YouTube", Icon: Youtube },
-  { id: "facebook", label: "Facebook", Icon: SiFacebook },
-  { id: "threads", label: "Threads", Icon: null },
-  { id: "x", label: "X (Twitter)", Icon: SiX },
-  { id: "seo", label: "SEO & Traffic", Icon: Globe },
-  { id: "telegram", label: "telegram", Icon: SiTelegram },
-  { id: "linkedin", label: "linkedin", Icon: null },
-  { id: "discord", label: "discord", Icon: SiDiscord },
-  { id: "twitch", label: "twitch", Icon: SiTwitch },
-  { id: "snapchat", label: "snapchat", Icon: SiSnapchat },
-  { id: "pinterest", label: "pinterest", Icon: SiPinterest },
-  { id: "spotify", label: "spotify", Icon: SiSpotify },
-];
-
-const TIERS = ["All Tiers", "Fast", "Plus", "Pro", "Steady", "Premium", "Elite"];
+import { SERVICES_CATALOG, PLATFORMS_META, TOTAL_SERVICES, type Service } from "@/data/services-catalog";
 
 const TIER_COLORS: Record<string, string> = {
   Fast: "bg-green-500/15 text-green-400 border-green-500/25",
@@ -35,180 +16,399 @@ const TIER_COLORS: Record<string, string> = {
   Elite: "bg-red-500/15 text-red-400 border-red-500/25",
 };
 
-const SERVICES = [
-  { id: 1, platform: "discord", name: "Discord Offline Server Members | Offline Users | No Drop", tier: "Plus", minQty: 20, maxQty: 1500, pricePerK: 128933, refill: true },
-  { id: 2, platform: "discord", name: "Discord Members | Offline | Add Bot", tier: "Plus", minQty: 20, maxQty: 1500, pricePerK: 127805, refill: true },
-  { id: 3, platform: "discord", name: "Discord Members | Offline | Add Bot", tier: "Plus", minQty: 20, maxQty: 1500, pricePerK: 133379, refill: false },
-  { id: 4, platform: "discord", name: "Discord x20 Server Boost 1 Months [Refill: 30D] [Instant Start] [No Bot]", tier: "Fast", minQty: 1, maxQty: 100, pricePerK: 48500, refill: true },
-  { id: 5, platform: "discord", name: "Discord x14 Server Boost 1 Months [Refill: 30D] [Instant Start] [No Bot]", tier: "Fast", minQty: 1, maxQty: 100, pricePerK: 33950, refill: true },
-  { id: 6, platform: "instagram", name: "IG Followers (NG Fast)", tier: "Fast", minQty: 100, maxQty: 100000, pricePerK: 1360, refill: true },
-  { id: 7, platform: "instagram", name: "IG Followers (NG Plus)", tier: "Plus", minQty: 100, maxQty: 100000, pricePerK: 1920, refill: true },
-  { id: 8, platform: "instagram", name: "IG Followers (Global Plus)", tier: "Plus", minQty: 100, maxQty: 100000, pricePerK: 1520, refill: true },
-  { id: 9, platform: "instagram", name: "IG Likes (NG Plus)", tier: "Plus", minQty: 50, maxQty: 50000, pricePerK: 800, refill: true },
-  { id: 10, platform: "instagram", name: "IG Views (Reels — Fast)", tier: "Fast", minQty: 500, maxQty: 1000000, pricePerK: 280, refill: false },
-  { id: 11, platform: "instagram", name: "IG Story Views (NG)", tier: "Fast", minQty: 100, maxQty: 100000, pricePerK: 320, refill: false },
-  { id: 12, platform: "tiktok", name: "TK Views (Fast)", tier: "Fast", minQty: 1000, maxQty: 10000000, pricePerK: 160, refill: false },
-  { id: 13, platform: "tiktok", name: "TK Followers (NG Plus)", tier: "Plus", minQty: 100, maxQty: 50000, pricePerK: 1800, refill: true },
-  { id: 14, platform: "tiktok", name: "TK Likes (Fast)", tier: "Fast", minQty: 100, maxQty: 500000, pricePerK: 280, refill: false },
-  { id: 15, platform: "tiktok", name: "TK Comments (Random)", tier: "Pro", minQty: 10, maxQty: 10000, pricePerK: 4500, refill: false },
-  { id: 16, platform: "youtube", name: "YT Subscribers (Fast)", tier: "Fast", minQty: 100, maxQty: 100000, pricePerK: 3200, refill: true },
-  { id: 17, platform: "youtube", name: "YT Views (Monetize Safe)", tier: "Pro", minQty: 1000, maxQty: 1000000, pricePerK: 620, refill: false },
-  { id: 18, platform: "youtube", name: "YT Likes (Fast)", tier: "Fast", minQty: 50, maxQty: 50000, pricePerK: 950, refill: false },
-  { id: 19, platform: "youtube", name: "YT Watch Hours (4,000hr Package)", tier: "Premium", minQty: 1, maxQty: 1, pricePerK: 85000, refill: false },
-  { id: 20, platform: "facebook", name: "FB Page Likes (NG)", tier: "Fast", minQty: 100, maxQty: 100000, pricePerK: 1100, refill: true },
-  { id: 21, platform: "facebook", name: "FB Post Likes", tier: "Fast", minQty: 50, maxQty: 50000, pricePerK: 650, refill: false },
-  { id: 22, platform: "facebook", name: "FB Group Members", tier: "Plus", minQty: 100, maxQty: 10000, pricePerK: 2400, refill: true },
-  { id: 23, platform: "x", name: "X (Twitter) Followers (NG)", tier: "Fast", minQty: 100, maxQty: 50000, pricePerK: 1600, refill: true },
-  { id: 24, platform: "x", name: "X (Twitter) Likes (Fast)", tier: "Fast", minQty: 50, maxQty: 50000, pricePerK: 480, refill: false },
-  { id: 25, platform: "telegram", name: "Telegram Members (Real)", tier: "Plus", minQty: 100, maxQty: 500000, pricePerK: 2200, refill: true },
-  { id: 26, platform: "telegram", name: "Telegram Post Views", tier: "Fast", minQty: 100, maxQty: 1000000, pricePerK: 180, refill: false },
-  { id: 27, platform: "spotify", name: "Spotify Streams (Fast)", tier: "Fast", minQty: 1000, maxQty: 10000000, pricePerK: 380, refill: false },
-  { id: 28, platform: "spotify", name: "Spotify Followers", tier: "Plus", minQty: 100, maxQty: 100000, pricePerK: 2800, refill: true },
-  { id: 29, platform: "seo", name: "Website Traffic (Real Visitors)", tier: "Pro", minQty: 1000, maxQty: 1000000, pricePerK: 520, refill: false },
-  { id: 30, platform: "seo", name: "Google Maps Reviews", tier: "Premium", minQty: 5, maxQty: 500, pricePerK: 18000, refill: false },
-  { id: 31, platform: "linkedin", name: "LinkedIn Connections (NG)", tier: "Plus", minQty: 100, maxQty: 10000, pricePerK: 3200, refill: true },
-  { id: 32, platform: "twitch", name: "Twitch Followers", tier: "Fast", minQty: 100, maxQty: 50000, pricePerK: 2400, refill: true },
-  { id: 33, platform: "snapchat", name: "Snapchat Followers", tier: "Fast", minQty: 100, maxQty: 10000, pricePerK: 1800, refill: true },
-  { id: 34, platform: "pinterest", name: "Pinterest Followers", tier: "Fast", minQty: 100, maxQty: 50000, pricePerK: 1400, refill: true },
-  { id: 35, platform: "threads", name: "Threads Followers (NG)", tier: "Fast", minQty: 100, maxQty: 100000, pricePerK: 1900, refill: true },
-];
+const PLATFORM_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  instagram: Instagram,
+  tiktok: SiTiktok,
+  youtube: Youtube,
+  facebook: SiFacebook,
+  x: SiX,
+  telegram: SiTelegram,
+  spotify: SiSpotify,
+  discord: SiDiscord,
+  twitch: SiTwitch,
+  snapchat: SiSnapchat,
+  pinterest: SiPinterest,
+  linkedin: Briefcase,
+  whatsapp: SiWhatsapp,
+  soundcloud: SiSoundcloud,
+  seo: Globe,
+  threads: SiX,
+};
+
+const TIERS = ["All Tiers", "Fast", "Plus", "Pro", "Steady", "Premium", "Elite"];
+const PAGE_SIZE = 100;
+
+function formatPrice(pricePerK: number, minQty: number) {
+  const minOrder = (pricePerK * minQty) / 1000;
+  return { perK: pricePerK, minOrder };
+}
 
 export default function Services() {
   const [search, setSearch] = useState("");
   const [platform, setPlatform] = useState("all");
   const [tier, setTier] = useState("All Tiers");
+  const [refillOnly, setRefillOnly] = useState(false);
+  const [page, setPage] = useState(1);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [orderQty, setOrderQty] = useState("");
+  const [orderLink, setOrderLink] = useState("");
 
-  const filtered = SERVICES.filter(s => {
-    const matchPlatform = platform === "all" || s.platform === platform;
-    const matchTier = tier === "All Tiers" || s.tier === tier;
-    const matchSearch = !search || s.name.toLowerCase().includes(search.toLowerCase());
-    return matchPlatform && matchTier && matchSearch;
-  });
+  const filtered = useMemo(() => {
+    return SERVICES_CATALOG.filter(s => {
+      if (platform !== "all" && s.platform !== platform) return false;
+      if (tier !== "All Tiers" && s.tier !== tier) return false;
+      if (refillOnly && !s.refill) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q) || s.platform.toLowerCase().includes(q);
+      }
+      return true;
+    });
+  }, [search, platform, tier, refillOnly]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const handleFilter = (key: string, val: string | boolean, reset = true) => {
+    if (reset) setPage(1);
+    if (key === "platform") setPlatform(val as string);
+    if (key === "tier") setTier(val as string);
+    if (key === "refill") setRefillOnly(val as boolean);
+    if (key === "search") { setSearch(val as string); setPage(1); }
+  };
+
+  const orderTotal = selectedService && orderQty
+    ? ((selectedService.pricePerK * Number(orderQty)) / 1000).toFixed(0)
+    : null;
 
   return (
-    <div className="min-h-screen py-10 px-4">
-      <div className="container mx-auto max-w-6xl">
+    <div className="min-h-screen py-8 px-4">
+      <div className="container mx-auto max-w-7xl">
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="text-xs uppercase tracking-widest font-bold text-primary mb-2">SERVICE CATALOG</div>
-          <h1 className="text-4xl md:text-6xl font-black mb-2">3,700+ services.</h1>
-          <h2 className="text-4xl md:text-6xl font-black text-muted-foreground mb-6">Every platform.</h2>
-          <p className="text-muted-foreground max-w-xl">Structured across six tiers — Fast, Plus, Pro, Steady, Premium, Elite.</p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="text-4xl md:text-6xl font-black">
+                {TOTAL_SERVICES.toLocaleString()}+ services.
+              </h1>
+              <h2 className="text-3xl md:text-5xl font-black text-muted-foreground">Every platform.</h2>
+              <p className="text-muted-foreground mt-2">6 service tiers · Real delivery · Nigerian Naira pricing</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center md:text-right">
+              {[
+                { label: "Platforms", val: "20+" },
+                { label: "Instant Start", val: "850+" },
+                { label: "With Refill", val: "1,200+" },
+              ].map(item => (
+                <div key={item.label} className="bg-card border border-border/50 rounded-xl p-3">
+                  <div className="text-xl font-black text-primary">{item.val}</div>
+                  <div className="text-xs text-muted-foreground">{item.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </motion.div>
 
-        {/* Search */}
-        <div className="relative mb-5">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <input
-            type="search"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search services..."
-            className="w-full h-12 pl-11 pr-4 rounded-xl border border-border/50 bg-card text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
-          />
-        </div>
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar Filters */}
+          <aside className="lg:w-56 shrink-0 space-y-4">
+            <div className="bg-card border border-border/50 rounded-xl p-4 sticky top-20">
+              <div className="font-semibold text-sm mb-4 flex items-center gap-2">
+                <Filter className="h-4 w-4 text-primary" /> Filters
+              </div>
 
-        {/* Platform filter */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {PLATFORMS.map(p => {
-            const Icon = p.Icon;
-            return (
+              {/* Platform list */}
+              <div className="space-y-1 mb-5">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Platform</div>
+                {PLATFORMS_META.slice(0, 16).map(p => {
+                  const Icon = PLATFORM_ICONS[p.id];
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => handleFilter("platform", p.id)}
+                      className={cn(
+                        "w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+                        platform === p.id
+                          ? "bg-primary/10 text-primary border border-primary/30"
+                          : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        {Icon && <Icon className="h-3.5 w-3.5 shrink-0" />}
+                        {p.label}
+                      </span>
+                      {p.id !== "all" && (
+                        <span className="text-[10px] opacity-60">{(p as any).count?.toLocaleString()}</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Tier */}
+              <div className="space-y-1 mb-5">
+                <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Tier</div>
+                {TIERS.map(t => (
+                  <button
+                    key={t}
+                    onClick={() => handleFilter("tier", t)}
+                    className={cn(
+                      "w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+                      tier === t
+                        ? "bg-primary/10 text-primary border border-primary/30"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+                    )}
+                  >
+                    {t !== "All Tiers" && (
+                      <span className={cn("inline-block w-2 h-2 rounded-full mr-2", {
+                        "bg-green-400": t === "Fast",
+                        "bg-blue-400": t === "Plus",
+                        "bg-violet-400": t === "Pro",
+                        "bg-yellow-400": t === "Steady",
+                        "bg-orange-400": t === "Premium",
+                        "bg-red-400": t === "Elite",
+                      })} />
+                    )}
+                    {t}
+                  </button>
+                ))}
+              </div>
+
+              {/* Refill toggle */}
               <button
-                key={p.id}
-                onClick={() => setPlatform(p.id)}
+                onClick={() => handleFilter("refill", !refillOnly)}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
-                  platform === p.id
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
+                  "w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-medium border transition-all",
+                  refillOnly
+                    ? "bg-green-500/10 border-green-500/30 text-green-400"
+                    : "border-border/50 text-muted-foreground hover:border-primary/30"
                 )}
               >
-                {Icon && <Icon className="h-3.5 w-3.5" />}
-                {p.label}
+                <RefreshCcw className="h-3.5 w-3.5" />
+                Refill Only
               </button>
-            );
-          })}
-        </div>
+            </div>
+          </aside>
 
-        {/* Tier filter */}
-        <div className="flex items-center gap-2 mb-6 flex-wrap">
-          <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">TIER:</span>
-          {TIERS.map(t => (
-            <button
-              key={t}
-              onClick={() => setTier(t)}
-              className={cn(
-                "px-3 py-1.5 rounded-full text-sm font-medium border transition-all",
-                tier === t
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
-              )}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {/* Search + results count */}
+            <div className="flex items-center gap-3 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={e => handleFilter("search", e.target.value)}
+                  placeholder="Search services, platforms..."
+                  className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/50 bg-card text-sm focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30 transition-all"
+                />
+              </div>
+              <div className="shrink-0 text-sm text-muted-foreground whitespace-nowrap">
+                <span className="font-bold text-foreground">{filtered.length.toLocaleString()}</span> found
+              </div>
+            </div>
 
-        <div className="text-sm text-muted-foreground mb-5 flex items-center justify-between">
-          <span>{filtered.length.toLocaleString()} services found</span>
-          <div className="flex items-center gap-2">
-            <Filter className="h-3.5 w-3.5" />
-            <span>{platform === "all" ? "All Platforms" : platform} · {tier}</span>
-          </div>
-        </div>
-
-        {/* Services list */}
-        <div className="space-y-3">
-          {filtered.map((service, i) => (
-            <motion.div
-              key={service.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i * 0.02, 0.5) }}
-              className="group p-4 rounded-xl border border-border/50 bg-card hover:border-primary/30 transition-all cursor-pointer"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <span className={cn("text-xs px-2 py-0.5 rounded-full border font-medium", TIER_COLORS[service.tier] || "border-border/50 text-muted-foreground bg-secondary/30")}>
-                      {service.tier}
-                    </span>
-                    {service.refill && (
-                      <span className="text-xs flex items-center gap-1 text-green-400">
-                        <RefreshCcw className="h-3 w-3" />
-                        Refill
-                      </span>
-                    )}
+            {/* Table */}
+            <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
+              {/* Table header */}
+              <div className="hidden md:grid grid-cols-[48px_1fr_80px_100px_80px_80px_90px] gap-0 border-b border-border/50 bg-secondary/30">
+                {["ID", "Service Name", "Tier", "Category", "Min", "Max", "Rate/1K"].map((h, i) => (
+                  <div key={h} className={cn("px-3 py-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider", i === 1 ? "col-span-1" : "")}>
+                    {h}
                   </div>
-                  <div className="font-medium text-sm mb-1 group-hover:text-primary transition-colors">{service.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {service.platform.charAt(0).toUpperCase() + service.platform.slice(1)} · {service.minQty.toLocaleString()} – {service.maxQty.toLocaleString()} units
-                  </div>
+                ))}
+              </div>
+
+              {/* Service rows */}
+              <div className="divide-y divide-border/30">
+                {paged.map((service) => {
+                  const PlatIcon = PLATFORM_ICONS[service.platform];
+                  return (
+                    <motion.div
+                      key={service.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className={cn(
+                        "group cursor-pointer hover:bg-primary/5 transition-colors",
+                        selectedService?.id === service.id && "bg-primary/8 border-l-2 border-primary"
+                      )}
+                      onClick={() => setSelectedService(selectedService?.id === service.id ? null : service)}
+                    >
+                      {/* Desktop row */}
+                      <div className="hidden md:grid grid-cols-[48px_1fr_80px_100px_80px_80px_90px] gap-0 items-center px-0 py-0">
+                        <div className="px-3 py-3 text-xs text-muted-foreground font-mono">{service.id}</div>
+                        <div className="px-3 py-3">
+                          <div className="flex items-center gap-2">
+                            {PlatIcon && <PlatIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                            <span className="text-sm font-medium group-hover:text-primary transition-colors line-clamp-1">{service.name}</span>
+                            {service.refill && <RefreshCcw className="h-3 w-3 text-green-400 shrink-0" />}
+                          </div>
+                          <div className="text-xs text-muted-foreground ml-5.5 mt-0.5">{service.avgTime} delivery</div>
+                        </div>
+                        <div className="px-3 py-3">
+                          <span className={cn("text-[11px] px-2 py-0.5 rounded-full border font-medium", TIER_COLORS[service.tier] || "border-border/50")}>
+                            {service.tier}
+                          </span>
+                        </div>
+                        <div className="px-3 py-3 text-xs text-muted-foreground">{service.category}</div>
+                        <div className="px-3 py-3 text-xs text-muted-foreground">{service.minQty.toLocaleString()}</div>
+                        <div className="px-3 py-3 text-xs text-muted-foreground">{service.maxQty.toLocaleString()}</div>
+                        <div className="px-3 py-3">
+                          <div className="text-sm font-bold text-primary">₦{service.pricePerK.toLocaleString()}</div>
+                        </div>
+                      </div>
+
+                      {/* Mobile card */}
+                      <div className="md:hidden p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full border font-medium", TIER_COLORS[service.tier])}>
+                                {service.tier}
+                              </span>
+                              {service.refill && <RefreshCcw className="h-3 w-3 text-green-400" />}
+                            </div>
+                            <div className="text-sm font-medium group-hover:text-primary transition-colors">{service.name}</div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {service.minQty.toLocaleString()} – {service.maxQty.toLocaleString()} · {service.avgTime}
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-primary font-bold text-sm">₦{service.pricePerK.toLocaleString()}</div>
+                            <div className="text-[10px] text-muted-foreground">/1,000</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Expanded order panel */}
+                      {selectedService?.id === service.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          className="px-4 pb-4 border-t border-primary/20 bg-primary/5"
+                        >
+                          <div className="pt-4 grid md:grid-cols-3 gap-4">
+                            <div>
+                              <div className="text-xs font-semibold mb-2 uppercase tracking-wider text-primary">Service Details</div>
+                              <div className="space-y-1 text-xs text-muted-foreground">
+                                <div>ID: <span className="font-mono text-foreground">#{service.id}</span></div>
+                                <div>Platform: <span className="text-foreground capitalize">{service.platform}</span></div>
+                                <div>Type: <span className="text-foreground">{service.type}</span></div>
+                                <div>Delivery: <span className="text-foreground">{service.avgTime}</span></div>
+                                <div>Refill: <span className={service.refill ? "text-green-400" : "text-muted-foreground"}>{service.refill ? "Yes (30 Days)" : "No"}</span></div>
+                              </div>
+                            </div>
+                            <div className="md:col-span-2">
+                              <div className="text-xs font-semibold mb-2 uppercase tracking-wider text-primary">Place Order</div>
+                              <div className="flex flex-col sm:flex-row gap-3">
+                                <div className="flex-1">
+                                  <label className="text-xs text-muted-foreground block mb-1">Link / Username</label>
+                                  <input
+                                    type="text"
+                                    value={orderLink}
+                                    onChange={e => setOrderLink(e.target.value)}
+                                    placeholder="https://instagram.com/yourpage"
+                                    className="w-full h-9 px-3 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/50 transition-all text-xs"
+                                    onClick={e => e.stopPropagation()}
+                                  />
+                                </div>
+                                <div className="sm:w-32">
+                                  <label className="text-xs text-muted-foreground block mb-1">
+                                    Qty ({service.minQty.toLocaleString()}–{service.maxQty.toLocaleString()})
+                                  </label>
+                                  <input
+                                    type="number"
+                                    value={orderQty}
+                                    onChange={e => setOrderQty(e.target.value)}
+                                    min={service.minQty}
+                                    max={service.maxQty}
+                                    placeholder={service.minQty.toString()}
+                                    className="w-full h-9 px-3 rounded-lg border border-border/50 bg-background text-sm focus:outline-none focus:border-primary/50 transition-all"
+                                    onClick={e => e.stopPropagation()}
+                                  />
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mt-3">
+                                <div className="text-sm">
+                                  {orderTotal ? (
+                                    <span>Total: <strong className="text-primary">₦{Number(orderTotal).toLocaleString()}</strong></span>
+                                  ) : (
+                                    <span className="text-muted-foreground text-xs">Enter quantity to see total</span>
+                                  )}
+                                </div>
+                                <button
+                                  className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:bg-primary/90 transition-colors"
+                                  onClick={e => { e.stopPropagation(); alert("Sign in to place your order!"); }}
+                                >
+                                  <ShoppingCart className="h-3.5 w-3.5" />
+                                  Order Now
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {filtered.length === 0 && (
+                <div className="text-center py-20 text-muted-foreground">
+                  <Search className="h-10 w-10 mx-auto mb-4 opacity-20" />
+                  <p>No services found. Try different filters.</p>
                 </div>
-                <div className="text-right shrink-0">
-                  <div className="text-primary font-bold">₦{service.pricePerK.toLocaleString()}</div>
-                  <div className="text-xs text-muted-foreground">/ 1,000 units</div>
-                  <button className="mt-2 flex items-center gap-1 text-xs text-primary hover:opacity-70 transition-opacity ml-auto">
-                    Order <ArrowRight className="h-3 w-3" />
+              )}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-5">
+                <div className="text-sm text-muted-foreground">
+                  Page {page} of {totalPages} · {filtered.length.toLocaleString()} services
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                    className="px-3 py-1.5 rounded-lg border border-border/50 text-sm disabled:opacity-40 hover:border-primary/40 transition-colors"
+                  >
+                    ← Prev
+                  </button>
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    const p = Math.max(1, Math.min(page - 2, totalPages - 4)) + i;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={cn(
+                          "w-9 h-9 rounded-lg text-sm font-medium border transition-colors",
+                          page === p ? "bg-primary text-primary-foreground border-primary" : "border-border/50 text-muted-foreground hover:border-primary/40"
+                        )}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                    disabled={page === totalPages}
+                    className="px-3 py-1.5 rounded-lg border border-border/50 text-sm disabled:opacity-40 hover:border-primary/40 transition-colors"
+                  >
+                    Next →
                   </button>
                 </div>
               </div>
-            </motion.div>
-          ))}
+            )}
 
-          {filtered.length === 0 && (
-            <div className="text-center py-20 text-muted-foreground">
-              <Star className="h-10 w-10 mx-auto mb-4 opacity-30" />
-              <p>No services match your filters.</p>
-            </div>
-          )}
-        </div>
-
-        {/* Load more indicator */}
-        {filtered.length > 0 && (
-          <div className="text-center mt-8 text-sm text-muted-foreground">
-            Showing {Math.min(filtered.length, 35)} of 3,700+ services. Use filters to narrow down.
+            <p className="text-center text-xs text-muted-foreground mt-6">
+              Showing {paged.length} of {filtered.length.toLocaleString()} matching services · Full catalog: {TOTAL_SERVICES.toLocaleString()}+ active services
+            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -12,6 +12,8 @@ import Dashboard from "@/pages/dashboard";
 import Reseller from "@/pages/reseller";
 import Giveaway from "@/pages/giveaway";
 import Posters from "@/pages/posters";
+import Admin from "@/pages/admin";
+import { FloatingPromoBanner } from "@/components/promo-banner";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +28,7 @@ function Router() {
       <Route path="/reseller" component={Reseller} />
       <Route path="/giveaway" component={Giveaway} />
       <Route path="/posters" component={Posters} />
+      <Route path="/admin" component={Admin} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -42,6 +45,7 @@ function App() {
           <Layout>
             <Router />
           </Layout>
+          <FloatingPromoBanner />
         </WouterRouter>
         <Toaster />
       </TooltipProvider>

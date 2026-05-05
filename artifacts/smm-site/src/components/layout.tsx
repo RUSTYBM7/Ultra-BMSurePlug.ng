@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { Menu, X, Instagram, Youtube, LogIn, LogOut, User } from "lucide-react";
+import { Menu, X, Instagram, Youtube, LogIn, LogOut, User, LayoutDashboard, ShieldCheck } from "lucide-react";
 import { SiTiktok, SiTelegram, SiWhatsapp, SiX } from "react-icons/si";
 import { useAuth } from "@workspace/replit-auth-web";
 import { cn } from "@/lib/utils";
 import logoImg from "@assets/7cc9b635-a649-48e0-9f17-b859010e9788_1777965417896.png";
+import { PagePromoBanner } from "./promo-banner";
 
 const VOICE_STUDIO_URL = "/voice-studio/";
 
@@ -20,16 +21,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/reseller", label: "Reseller" },
     { href: "/giveaway", label: "Giveaway 🎁" },
-    { href: "/posters", label: "Posters" },
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground dark">
-      {/* Announcement bar */}
+      {/* Announcement ticker */}
       <div className="bg-primary text-primary-foreground text-xs font-medium py-2 overflow-hidden">
         <div className="ticker-wrap">
           <div className="ticker-content gap-16 px-8">
-            {[1,2].map(k => (
+            {[1, 2].map(k => (
               <span key={k} className="flex items-center gap-8">
                 <span>🚀 3,700+ services live on BM SocialMedia Hub</span>
                 <span className="opacity-60">·</span>
@@ -45,15 +45,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
+      {/* Promo offer bar */}
+      <PagePromoBanner />
+
       {/* Header */}
       <header className="sticky top-0 z-50 glass">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Logo — uses real brand image */}
-          <Link href="/" className="flex items-center hover:opacity-85 transition-opacity">
+
+          {/* Logo — bigger, with wordmark */}
+          <Link href="/" className="flex items-center gap-3 hover:opacity-85 transition-opacity">
             <img
               src={logoImg}
               alt="bmsocial hub"
-              className="h-10 w-auto object-contain"
+              className="h-14 w-auto object-contain"
+              style={{ maxWidth: 160 }}
             />
           </Link>
 
@@ -72,11 +77,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {item.label}
               </Link>
             ))}
+            <a
+              href={VOICE_STUDIO_URL}
+              className="px-3 py-2 rounded-md text-sm font-medium text-[hsl(184_100%_50%)] hover:bg-[hsl(184_100%_50%/0.08)] transition-colors"
+            >
+              🎙 VoiceStudio
+            </a>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Social icons desktop */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-1.5">
               {[
                 { Icon: Instagram, href: "#" },
                 { Icon: SiTiktok, href: "#" },
@@ -88,16 +99,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               ))}
             </div>
 
-            {/* Auth button */}
+            {/* Auth */}
             {!isLoading && (
               isAuthenticated ? (
                 <div className="hidden md:flex items-center gap-2">
-                  <div className="flex items-center gap-1.5 bg-secondary/50 border border-border/40 rounded-full px-3 py-1.5">
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-1.5 bg-secondary/50 border border-border/40 rounded-full px-3 py-1.5 hover:border-primary/40 transition-colors"
+                  >
                     <User className="h-3.5 w-3.5 text-primary" />
                     <span className="text-xs font-medium truncate max-w-[80px]">
-                      {user?.firstName || user?.username || "User"}
+                      {user?.firstName || user?.username || "My Account"}
                     </span>
-                  </div>
+                  </Link>
                   <button
                     onClick={logout}
                     className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/50 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
@@ -117,7 +131,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               )
             )}
 
-            {/* Mobile menu toggle */}
+            {/* Mobile toggle */}
             <button
               className="md:hidden w-9 h-9 rounded-lg border border-border/50 flex items-center justify-center hover:border-primary/50 transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -155,13 +169,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </a>
               {!isLoading && (
                 isAuthenticated ? (
-                  <button
-                    onClick={() => { setMobileOpen(false); logout(); }}
-                    className="mt-1 px-4 py-3 rounded-lg border border-border/40 text-sm text-muted-foreground font-medium text-left flex items-center gap-2"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sign out ({user?.firstName || "User"})
-                  </button>
+                  <div className="mt-1 flex flex-col gap-1">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setMobileOpen(false)}
+                      className="px-4 py-3 rounded-lg bg-secondary/40 text-sm font-medium flex items-center gap-2"
+                    >
+                      <LayoutDashboard className="h-4 w-4 text-primary" />
+                      My Dashboard
+                    </Link>
+                    <button
+                      onClick={() => { setMobileOpen(false); logout(); }}
+                      className="px-4 py-3 rounded-lg border border-border/40 text-sm text-muted-foreground font-medium text-left flex items-center gap-2"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out ({user?.firstName || "User"})
+                    </button>
+                  </div>
                 ) : (
                   <button
                     onClick={() => { setMobileOpen(false); login(); }}
@@ -182,11 +206,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 bg-card py-12">
+      <footer className="border-t border-border/50 bg-card py-14">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-10">
             <div>
-              <img src={logoImg} alt="bmsocial hub" className="h-12 w-auto object-contain mb-4" />
+              <img src={logoImg} alt="bmsocial hub" className="h-16 w-auto object-contain mb-4" style={{ maxWidth: 180 }} />
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Nigeria's #1 Social Media Growth Studio. Real results, transparent pricing, built for creators.
               </p>
@@ -215,7 +239,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div>
               <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">Platforms</h4>
               <ul className="space-y-2">
-                {["Instagram", "TikTok", "YouTube", "Facebook", "X (Twitter)", "Telegram"].map(p => (
+                {["Instagram", "TikTok", "YouTube", "Facebook", "X (Twitter)", "Telegram", "Spotify", "Threads"].map(p => (
                   <li key={p}>
                     <Link href="/services" className="text-sm text-muted-foreground hover:text-foreground transition-colors">{p}</Link>
                   </li>
@@ -227,10 +251,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <h4 className="font-semibold mb-4 text-sm uppercase tracking-wider text-muted-foreground">BM Products</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">BM SocialMedia Hub</Link>
+                  <Link href="/" className="text-sm font-medium text-primary">BM SocialMedia Hub</Link>
                 </li>
                 <li>
-                  <a href={VOICE_STUDIO_URL} className="text-sm text-primary font-medium hover:opacity-80 transition-opacity flex items-center gap-1">
+                  <a href={VOICE_STUDIO_URL} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
                     🎙 BMVoicePlug.ng
                     <span className="text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">New</span>
                   </a>
@@ -245,6 +269,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     </li>
                   ))}
                 </ul>
+              </div>
+              <div className="mt-6">
+                <Link href="/admin" className="text-xs text-muted-foreground/50 hover:text-muted-foreground transition-colors flex items-center gap-1">
+                  <ShieldCheck className="h-3 w-3" />
+                  Admin
+                </Link>
               </div>
             </div>
           </div>

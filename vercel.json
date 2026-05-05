@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "buildCommand": "pnpm --filter @workspace/smm-site build && pnpm --filter @workspace/voice-studio build",
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/smm/(.*)", "destination": "/artifacts/smm-site/dist/public/$1" },
+    { "source": "/voice-studio/(.*)", "destination": "/artifacts/voice-studio/dist/public/$1" },
+    { "source": "/api/(.*)", "destination": "/artifacts/api-server/api/index.js" }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Cookie" }
+      ]
+    }
+  ]
+}
