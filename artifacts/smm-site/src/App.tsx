@@ -11,6 +11,7 @@ import Marketplace from "@/pages/marketplace";
 import Dashboard from "@/pages/dashboard";
 import Reseller from "@/pages/reseller";
 import Giveaway from "@/pages/giveaway";
+import Posters from "@/pages/posters";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ function Router() {
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/reseller" component={Reseller} />
       <Route path="/giveaway" component={Giveaway} />
+      <Route path="/posters" component={Posters} />
       <Route component={NotFound} />
     </Switch>
   );

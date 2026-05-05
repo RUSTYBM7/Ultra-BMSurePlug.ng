@@ -1,14 +1,17 @@
 import { Link, useLocation } from "wouter";
 import { useState } from "react";
-import { Menu, X, Instagram, Youtube, ChevronRight } from "lucide-react";
+import { Menu, X, Instagram, Youtube, LogIn, LogOut, User } from "lucide-react";
 import { SiTiktok, SiTelegram, SiWhatsapp, SiX } from "react-icons/si";
+import { useAuth } from "@workspace/replit-auth-web";
 import { cn } from "@/lib/utils";
+import logoImg from "@assets/7cc9b635-a649-48e0-9f17-b859010e9788_1777965417896.png";
 
 const VOICE_STUDIO_URL = "/voice-studio/";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, isLoading, isAuthenticated, login, logout } = useAuth();
 
   const navItems = [
     { href: "/services", label: "Services" },
@@ -17,6 +20,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { href: "/dashboard", label: "Dashboard" },
     { href: "/reseller", label: "Reseller" },
     { href: "/giveaway", label: "Giveaway 🎁" },
+    { href: "/posters", label: "Posters" },
   ];
 
   return (
@@ -44,16 +48,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Header */}
       <header className="sticky top-0 z-50 glass">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex flex-col leading-tight hover:opacity-80 transition-opacity">
-            <div className="flex items-center gap-1">
-              <span className="font-black text-xl text-white tracking-tight">bmsocial</span>
-              <ChevronRight className="h-3 w-3 text-primary" />
-            </div>
-            <span className="font-black text-2xl text-primary -mt-1 leading-none">hub</span>
-            <span className="text-[9px] text-muted-foreground tracking-wider font-medium">Social media Growth studio ▶</span>
+          {/* Logo — uses real brand image */}
+          <Link href="/" className="flex items-center hover:opacity-85 transition-opacity">
+            <img
+              src={logoImg}
+              alt="bmsocial hub"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-0.5">
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -71,7 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="flex items-center gap-3">
-            {/* Social icons */}
+            {/* Social icons desktop */}
             <div className="hidden lg:flex items-center gap-2">
               {[
                 { Icon: Instagram, href: "#" },
@@ -82,12 +86,38 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <Icon className="h-3.5 w-3.5" />
                 </a>
               ))}
-              <div className="w-7 h-7 rounded-full bg-secondary/50 border border-border/50 flex items-center justify-center text-xs font-bold text-muted-foreground">
-                +17
-              </div>
             </div>
 
-            {/* Mobile menu */}
+            {/* Auth button */}
+            {!isLoading && (
+              isAuthenticated ? (
+                <div className="hidden md:flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 bg-secondary/50 border border-border/40 rounded-full px-3 py-1.5">
+                    <User className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-xs font-medium truncate max-w-[80px]">
+                      {user?.firstName || user?.username || "User"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border/50 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={login}
+                  className="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-full bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  Sign In
+                </button>
+              )
+            )}
+
+            {/* Mobile menu toggle */}
             <button
               className="md:hidden w-9 h-9 rounded-lg border border-border/50 flex items-center justify-center hover:border-primary/50 transition-colors"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -119,10 +149,29 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <a
                 href={VOICE_STUDIO_URL}
                 onClick={() => setMobileOpen(false)}
-                className="mt-2 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-center"
+                className="mt-2 px-4 py-3 rounded-lg bg-[hsl(184_100%_50%/0.1)] border border-[hsl(184_100%_50%/0.3)] text-[hsl(184_100%_50%)] font-semibold text-center text-sm"
               >
                 🎙 BMVoicePlug Studio
               </a>
+              {!isLoading && (
+                isAuthenticated ? (
+                  <button
+                    onClick={() => { setMobileOpen(false); logout(); }}
+                    className="mt-1 px-4 py-3 rounded-lg border border-border/40 text-sm text-muted-foreground font-medium text-left flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out ({user?.firstName || "User"})
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setMobileOpen(false); login(); }}
+                    className="mt-1 px-4 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-center text-sm flex items-center justify-center gap-2"
+                  >
+                    <LogIn className="h-4 w-4" />
+                    Sign In / Create Account
+                  </button>
+                )
+              )}
             </nav>
           </div>
         )}
@@ -137,13 +186,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-10">
             <div>
-              <div className="flex flex-col leading-tight mb-4">
-                <div className="flex items-center gap-1">
-                  <span className="font-black text-lg text-white">bmsocial</span>
-                  <ChevronRight className="h-3 w-3 text-primary" />
-                </div>
-                <span className="font-black text-xl text-primary -mt-0.5">hub</span>
-              </div>
+              <img src={logoImg} alt="bmsocial hub" className="h-12 w-auto object-contain mb-4" />
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Nigeria's #1 Social Media Growth Studio. Real results, transparent pricing, built for creators.
               </p>
@@ -208,7 +251,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="border-t border-border/40 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-xs text-muted-foreground">
-              © {new Date().getFullYear()} BM SocialMedia Hub. All rights reserved. Nigeria's #1 Social Growth Platform.
+              © {new Date().getFullYear()} BM SocialMedia Hub · www.bmsureplug.online
             </p>
             <p className="text-xs text-muted-foreground">
               Built for Nigerian Creators · Transparent Naira Pricing
