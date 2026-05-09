@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useListVoices, getListVoicesQueryKey } from "@workspace/api-client-react";
+import { useListVoices, getListVoicesQueryKey, ListVoicesCategory } from "@workspace/api-client-react";
 import { Play, Pause, Mic, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,11 +16,11 @@ const categoryColors: Record<string, string> = {
 
 export default function Voices() {
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
+  const [category, setCategory] = useState<ListVoicesCategory>("all");
   const [gender, setGender] = useState("all");
   const [playingId, setPlayingId] = useState<string | null>(null);
 
-  const { data, isLoading } = useListVoices({ category: category === "all" ? undefined : category }, { query: { queryKey: getListVoicesQueryKey({ category }) } });
+  const { data, isLoading } = useListVoices({ category: category === "all" ? undefined : category }, { query: { queryKey: getListVoicesQueryKey({ category: category === "all" ? undefined : category }) } });
   const voices = data?.voices || [];
 
   const filtered = voices.filter((v) => {
@@ -76,7 +76,7 @@ export default function Voices() {
             {["all", "free", "premium", "cloned"].map((cat) => (
               <button
                 key={cat}
-                onClick={() => setCategory(cat)}
+                onClick={() => setCategory(cat as ListVoicesCategory)}
                 className={cn(
                   "px-3 py-1.5 rounded-full text-sm font-medium border transition-all capitalize",
                   category === cat

@@ -58,7 +58,7 @@ export default function Clone() {
 
     const audioBase64 = await toBase64(file);
     clone.mutate(
-      { name, description, audioBase64, fileName: file.name },
+      { data: { name, description, audioBase64, fileName: file.name } },
       {
         onSuccess: (data) => {
           setClonedVoice({ voiceId: data.voiceId, name: data.name });

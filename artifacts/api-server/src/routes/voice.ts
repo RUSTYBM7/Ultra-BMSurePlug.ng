@@ -62,7 +62,7 @@ router.post("/tts", async (req, res) => {
       status: "completed",
     });
 
-    res.json({
+    return res.json({
       jobId,
       status: "completed",
       creditsUsed,
@@ -73,7 +73,7 @@ router.post("/tts", async (req, res) => {
       createdAt: new Date().toISOString(),
     });
   } catch (err) {
-    res.status(500).json({ error: "TTS generation failed" });
+    return res.status(500).json({ error: "TTS generation failed" });
   }
 });
 
@@ -101,7 +101,7 @@ router.post("/clone", async (req, res) => {
       previewUrl: null,
     });
 
-    res.json({
+    return res.json({
       voiceId,
       name,
       status: "ready",
@@ -109,7 +109,7 @@ router.post("/clone", async (req, res) => {
       message: `Voice "${name}" cloned successfully and is ready to use.`,
     });
   } catch (err) {
-    res.status(500).json({ error: "Voice cloning failed" });
+    return res.status(500).json({ error: "Voice cloning failed" });
   }
 });
 

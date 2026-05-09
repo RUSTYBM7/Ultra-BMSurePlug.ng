@@ -76,7 +76,7 @@ export default function Studio() {
     }
 
     tts.mutate(
-      { text, voiceId: selectedVoiceId, stability: stability[0], similarity: similarity[0], style: style[0] },
+      { data: { text, voiceId: selectedVoiceId, stability: stability[0], similarity: similarity[0], style: style[0] } },
       {
         onSuccess: (data) => {
           setGeneratedAudio(data);
