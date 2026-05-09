@@ -17,6 +17,7 @@ import VoiceDesign from "@/pages/voice-design";
 import SoundEffects from "@/pages/sound-effects";
 import Dubbing from "@/pages/dubbing";
 import Projects from "@/pages/projects";
+import UIShowcase from "@/pages/ui-showcase";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/sound-effects" component={SoundEffects} />
       <Route path="/dubbing" component={Dubbing} />
       <Route path="/projects" component={Projects} />
+      <Route path="/ui-showcase" component={UIShowcase} />
 
       {/* Stub pages for remaining features */}
       <Route path="/podcast">

@@ -1,11 +1,24 @@
 {
   "version": 2,
-  "buildCommand": "pnpm --filter @workspace/smm-site build && pnpm --filter @workspace/voice-studio build",
+  "buildCommand": "pnpm run build",
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/smm/(.*)", "destination": "/artifacts/smm-site/dist/public/$1" },
-    { "source": "/voice-studio/(.*)", "destination": "/artifacts/voice-studio/dist/public/$1" },
+    { "source": "/", "destination": "/artifacts/smm-site/dist/index.html" },
+    { "source": "/smm", "destination": "/artifacts/smm-site/dist/index.html" },
+    { "source": "/smm/(.*)", "destination": "/artifacts/smm-site/dist/$1" },
+    { "source": "/voice-studio", "destination": "/artifacts/voice-studio/dist/index.html" },
+    { "source": "/voice-studio/(.*)", "destination": "/artifacts/voice-studio/dist/$1" },
     { "source": "/api/(.*)", "destination": "/artifacts/api-server/api/index.js" }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/artifacts/smm-site/dist/assets/$1"
+    },
+    {
+      "src": "/voice-studio/assets/(.*)",
+      "dest": "/artifacts/voice-studio/dist/assets/$1"
+    }
   ],
   "headers": [
     {
@@ -14,6 +27,13 @@
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PUT,DELETE,OPTIONS" },
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Cookie" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" }
       ]
     }
   ]

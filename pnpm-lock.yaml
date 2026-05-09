@@ -848,6 +848,8 @@ importers:
         specifier: 'catalog:'
         version: 19.2.14
 
+  lib/ui-components: {}
+
   scripts:
     devDependencies:
       '@types/node':
